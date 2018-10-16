@@ -84,7 +84,7 @@ class ShellMagics(magic.Magics):
         args = parse_argstring(self.rx8, line)
         d8 = self._d8()
         block = d8.xpeek_block(args.address, args.size)
-        self.shell.write(hexdump(block, address=args.address & 0xffff))
+        sys.stdout.write(hexdump(block, address=args.address & 0xffff))
 
     @magic.line_magic
     @magic_arguments()
@@ -238,7 +238,7 @@ class ShellMagics(magic.Magics):
         changes = watch_scanner(d, args.address)
         try:
             for line in watch_tabulator(changes):
-                self.shell.write(line + '\n')
+                sys.stdout.write(line + '\n')
         except KeyboardInterrupt:
             pass
 
@@ -258,7 +258,7 @@ class ShellMagics(magic.Magics):
         results = search_block(d, args.address, args.size, substr, fast=args.fast, addr_space=args.space)
 
         for address, before, after in results:
-            self.shell.write("%08x %52s [ %s ] %s\n" %
+            sys.stdout.write("%08x %52s [ %s ] %s\n" %
                 (address, hexstr(before), hexstr(substr), hexstr(after)))
 
     @magic.line_magic
@@ -294,7 +294,7 @@ class ShellMagics(magic.Magics):
         args = parse_argstring(self.ovl, line)
         d = self.shell.user_ns['d']
         if args.address is None:
-            self.shell.write("base = %x, wordcount = %x\n" % overlay_get(d))
+            sys.stdout.write("base = %x, wordcount = %x\n" % overlay_get(d))
         else:
             overlay_set(d, args.address, args.wordcount)
 
@@ -307,7 +307,7 @@ class ShellMagics(magic.Magics):
         """Disassemble ARM instructions"""
         args = parse_argstring(self.dis, line)
         d = self.shell.user_ns['d']
-        self.shell.write(disassemble(d, args.address, args.size, thumb = not args.arm) + '\n')
+        sys.stdout.write(disassemble(d, args.address, args.size, thumb = not args.arm) + '\n')
 
     @magic.line_cell_magic
     @magic_arguments()
@@ -364,7 +364,7 @@ class ShellMagics(magic.Magics):
             for addr in range(0, args.limit, 4):
                 value = ivt_get(d, addr)
                 if value is not None:
-                    self.shell.write("vector %08x = %08x\n" % (addr, value))
+                    sys.stdout.write("vector %08x = %08x\n" % (addr, value))
 
         elif args.new_address is None:
             return ivt_get(d, args.vector)
@@ -428,7 +428,7 @@ class ShellMagics(magic.Magics):
 
         self.shell.user_ns['r0'] = r0
         self.shell.user_ns['r1'] = r1
-        self.shell.write("r0 = 0x%08x, r1 = 0x%08x\n" % (r0, r1))
+        sys.stdout.write("r0 = 0x%08x, r1 = 0x%08x\n" % (r0, r1))
 
     @magic.line_magic
     def tea(self, line, address=target_memory.shell_code):
@@ -566,7 +566,7 @@ class ShellMagics(magic.Magics):
 
         elif not line.strip():
             for key, value in includes.items():
-                self.shell.write('%s %s %s\n%s\n\n' % (
+                sys.stdout.write('%s %s %s\n%s\n\n' % (
                     '=' * 10,
                     key,
                     '=' * max(0, 70 - len(key)),
@@ -586,7 +586,7 @@ class ShellMagics(magic.Magics):
         d = self.shell.user_ns['d']
         cdb = ''.join(map(chr, args.cdb))
         data = scsi_in(d, cdb, args.len)
-        self.shell.write(hexdump(data))
+        sys.stdout.write(hexdump(data))
 
     @magic.line_magic
     @magic_arguments()
@@ -638,7 +638,7 @@ class ShellMagics(magic.Magics):
                 args.f.write(data)
                 args.f.flush()
 
-            self.shell.write(hexdump(data, address=lba*2048))
+            sys.stdout.write(hexdump(data, address=lba*2048))
             if args.lba is None:
                 # sequential mode
                 lba += 1
@@ -704,7 +704,7 @@ class ShellMagics(magic.Magics):
             if not d_bitbang:
                 raise UsageError("No bitbang shell to exit")
 
-            self.shell.write('* Asking bitbang backdoor to exit\n')
+            sys.stdout.write('* Asking bitbang backdoor to exit\n')
             d_bitbang.exit()
             self.shell.user_ns['d_bitbang'] = None
             self.shell.user_ns['d'] = d_remote
@@ -723,14 +723,14 @@ class ShellMagics(magic.Magics):
             if not args.attach:
                 bitbang_backdoor(d_remote, args.address, verbose=not args.quiet)
 
-            self.shell.write('* Connecting to bitbang backdoor via %s\n' % args.serial_port)
+            sys.stdout.write('* Connecting to bitbang backdoor via %s\n' % args.serial_port)
             d_bitbang = BitbangDevice(args.serial_port)
 
             self.shell.user_ns['d_bitbang'] = d_bitbang
             self.shell.user_ns['d'] = d_bitbang
 
         d = self.shell.user_ns['d']
-        self.shell.write('* Debug interface switched to %r\n' % d)
+        sys.stdout.write('* Debug interface switched to %r\n' % d)
 
         if args.cpu8051:
             self.shell.user_ns['d8'] = cpu8051_backdoor(d)
@@ -772,7 +772,7 @@ class ShellMagics(magic.Magics):
             if steps is None: steps = 0
             arm = simulate_arm(d)
             ns['arm'] = arm
-            self.shell.write('- initialized simulation state\n')
+            sys.stdout.write('- initialized simulation state\n')
             state = 'INIT'
             arm.copy_registers_to(ns)
 
@@ -798,7 +798,7 @@ class ShellMagics(magic.Magics):
 
         # Capture 'print' output from hook functions
         saved_stdout = sys.stdout
-        sys.stdout = Tee(self.shell, logfile)
+        sys.stdout = Tee(sys.stdout, logfile)
 
         try:
             while True:
@@ -811,7 +811,7 @@ class ShellMagics(magic.Magics):
                 # Throttled summary output to shell
                 now = time.time()
                 if now >= min_timestamp:
-                    self.shell.write('[%4s] %-70s %s\n' % (state, arm.summary_line(), arm.register_trace_line(8)))
+                    sys.stdout.write('[%4s] %-70s %s\n' % (state, arm.summary_line(), arm.register_trace_line(8)))
                     min_timestamp = now + 0.25
 
                 # Write detailed output to log file
@@ -819,11 +819,11 @@ class ShellMagics(magic.Magics):
                 assert logfile == arm.memory.logfile
 
                 if (arm.regs[15] & ~1) == pc_break:
-                    self.shell.write('- breakpoint reached\n%s' % arm.register_trace())
+                    sys.stdout.write('- breakpoint reached\n%s' % arm.register_trace())
                     break
 
                 if steps == 0:
-                    self.shell.write(arm.register_trace())
+                    sys.stdout.write(arm.register_trace())
                     break
         finally:
             sys.stdout = saved_stdout

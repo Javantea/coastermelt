@@ -63,6 +63,7 @@ from IPython.terminal.embed import InteractiveShellEmbed
 from shell_magics import ShellMagics
 from remote import Device
 import shell_namespace
+import sys
 messages = ''
 
 # Make a global device, but only give it to the user namespace.
@@ -85,4 +86,5 @@ ipy.alias_manager.define_alias('git', 'git')
 ipy.alias_manager.define_alias('make', 'make')
 
 # Hello, tiny world
-ipy.mainloop(display_banner = __doc__ + messages)
+sys.stdout.write(__doc__ + messages)
+ipy.mainloop()
