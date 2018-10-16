@@ -1,5 +1,5 @@
-#!/usr/bin/env python
-import sys, time, random, struct, cStringIO, binascii
+#!/usr/bin/env python3
+import sys, time, random, struct, io, binascii
 
 # Scan regions of memory for changes, and display those changes in real-time.
 # It's like My First Temporal Hex Dump. Great for kids!
@@ -107,11 +107,11 @@ def watch_scanner(d, addrs, verbose = True, block_wordcount = 4, memo_filename =
     round_number = 0
 
     # We can use a file on disk as memo for debugging or if we need something
-    # that handles large sparse address spaces, but usually cStringIO is fine.
+    # that handles large sparse address spaces, but usually BytesIO is fine.
     if memo_filename:
         memo = open(memo_filename, 'w+b')
     else:
-        memo = cStringIO.StringIO()
+        memo = io.BytesIO()
 
     # Initialize the memo with current memory contents
     for addr, fn in break_up_addresses(d, addrs, block_wordcount):
@@ -159,7 +159,7 @@ def watch_scanner(d, addrs, verbose = True, block_wordcount = 4, memo_filename =
         now = time.time()
         if verbose and now > output_timestamp + 1.0:
             output_timestamp = now
-            print "* scanning %d bytes at %.03f Hz" % (byte_count, round_number / (now - start_timestamp))
+            print("* scanning %d bytes at %.03f Hz" % (byte_count, round_number / (now - start_timestamp)))
 
 
 def watch_tabulator(change_iterator, legend_interval = 40, warmup_seconds = 1):
@@ -222,12 +222,12 @@ if __name__ == "__main__":
     import remote
 
     if len(sys.argv) < 2:
-        print "usage: %s address [addresses ...]" % sys.argv[0]
-        print "  Each address can be a single word or a range a:b including both ends"
+        print("usage: %s address [addresses ...]" % sys.argv[0])
+        print("  Each address can be a single word or a range a:b including both ends")
         sys.exit(1)
 
     d = remote.Device()      
     addrs = [tuple(int(n.replace('_',''), 16) for n in arg.split(':')) for arg in sys.argv[1:]]
     changes = watch_scanner(d, addrs)
     for line in watch_tabulator(changes):
-        print line
+        print(line)

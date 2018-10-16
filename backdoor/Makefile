@@ -17,7 +17,7 @@ HEXDUMP_TOOL := xxd
 UNZIP_TOOL   := unzip
 CURL_TOOL    := curl
 SHASUM_TOOL  := shasum
-PYTHON       := python
+PYTHON       := python3
 
 # Coastermelt tools
 FLASHER_DIR   := ../flasher

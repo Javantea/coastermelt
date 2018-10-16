@@ -36,7 +36,7 @@ __all__ = [
     'ldrpc_source_address', 'ldrpc_source_word',
 ]
 
-import os, random, re, struct, collections, subprocess
+import os, random, re, struct, collections, subprocess, functools
 from dump import *
 from target_memory import pad
 
@@ -177,7 +177,7 @@ def disassemble_string(data, address = 0, thumb = True):
             '--prefix-addresses',
             '--adjust-vma', '0x%08x' % address,
             '-M', ('force-thumb', 'no-force-thumb')[not thumb],
-            temp.bin])
+            temp.bin]).decode('utf8')
 
         return '\n'.join([
             '%s\t%s' % (l[2:10], l[11:])
@@ -409,14 +409,14 @@ def compile_with_automatic_return_type(d, address, expression, includes = includ
         return (
             compile(d, address, '(uint32_t)(%s)' % expression,
                         includes=includes, defines=defines, thumb=thumb),
-            lambda (r0, r1): r0
+            lambda r0, r1: r0
         )
     except CodeError:
         # Now assume void, wrap it in a block expression
         return (
             compile(d, address, '{ %s; 0; }' % expression,
                         includes=includes, defines=defines, thumb=thumb),
-            lambda (r0, r1): None
+            lambda r0, r1: None
         )
 
 
@@ -429,7 +429,7 @@ def evalc(d, expression, arg = 0, includes = includes, defines = defines, addres
         d, address, expression,
         includes=includes, defines=defines)
     if verbose:
-        print "* compiled to 0x%x bytes, loaded at 0x%x" % (code_size, address)
+        print("* compiled to 0x%x bytes, loaded at 0x%x" % (code_size, address))
     return retval_func(d.blx(address | 1, arg))
 
 
@@ -536,7 +536,7 @@ def side_by_side_disassembly(lines1, lines2):
     index1 = 0
     index2 = 0
     fmt = lambda l: str(l).expandtabs(8)
-    column_width = reduce(max, map(len, map(fmt, lines1)))
+    column_width = functools.reduce(max, map(len, map(fmt, lines1)))
     while True:
 
         line1 = index1 < len(lines1) and lines1[index1]
@@ -650,7 +650,7 @@ def compile51_string(address, code, defines = defines, show_listing = False):
             raise CodeError(output, temp.collect_text())
 
         if show_listing:
-            print open(temp.rst).read()
+            print(open(temp.rst).read())
 
         subprocess.check_call([ OBJCOPY, '-I', 'ihex', temp.hex, '-O', 'binary', temp.bin ])
         with open(temp.bin, 'rb') as f:

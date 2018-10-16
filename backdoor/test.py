@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 from struct import pack, unpack
 from binascii import a2b_hex, b2a_hex
 import random, struct, remote, hilbert
@@ -9,10 +9,10 @@ d = remote.Device()
 # Working our way up to "Hello World"!
 
 # We can speak normal SCSI here too, since that seems useful.
-print "Firmware: %r" % d.scsi_in(a2b_hex('120000006000000000000000'), 0x60)[8:48]
+print("Firmware: %r" % d.scsi_in(a2b_hex('120000006000000000000000'), 0x60)[8:48])
 
 # Say hi to the backdoor patch
-print "Backdoor: %r" % d.get_signature()
+print("Backdoor: %r" % d.get_signature())
 
 # Some free RAM! Test the peek/poke interface
 d.poke(pad + 0x8, 0x1234)
@@ -73,8 +73,8 @@ expected = map(hex,
 try:
 	assert w == expected
 except AssertionError:
-	print w
-	print expected
+	print(w)
+	print(expected)
 	raise
 
 # Also a trivial fill should behave like poke
@@ -85,4 +85,4 @@ assert d.peek(pad + 0x8) == 0x1234
 assert d.peek(pad + 0xc) == 0xf00f
 assert d.peek(pad + 0x10) == 0xffffffff
 
-print "Looks good!"
+print("Looks good!")

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # Let's have something like printf,
 # but based on a ring buffer in some memory that's not ours.
@@ -160,7 +160,7 @@ def console_mainloop(d,
                 time.sleep(0.1)
                 continue
 
-            except ConsoleOverflowError, e:
+            except ConsoleOverflowError as e:
                 # Warn loudly that we missed some data
                 sys.stderr.write('\n\n======== %s ========\n\n' % e)
 
@@ -178,7 +178,7 @@ if __name__ == "__main__":
     import remote
 
     if len(sys.argv) != 1:
-        print "usage: %s" % sys.argv[0]
+        print("usage: %s" % sys.argv[0])
         sys.exit(1)
 
     console_mainloop(remote.Device())

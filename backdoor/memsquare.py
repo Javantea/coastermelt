@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # Make a big square map of the ARM processor's view of memory. Each pixel will
 # represent 256 bytes of memory. 16 million pixels and we have the whole

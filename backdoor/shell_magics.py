@@ -38,7 +38,6 @@ class ShellMagics(magic.Magics):
         self.hex_mode = True
         formatter = self.shell.display_formatter.formatters['text/plain']
         formatter.for_type(int, self.int_formatter)
-        formatter.for_type(long, self.int_formatter)
 
     def int_formatter(self, n, p, cycle):
         if not self.hex_mode:
@@ -275,7 +274,7 @@ class ShellMagics(magic.Magics):
         d = self.shell.user_ns['d']
         try:
             for line in bitfuzz_rounds(d, args.address, args.wordcount, args.period, args.delay):
-                print line
+                print(line)
         except KeyboardInterrupt:
             return
 
@@ -332,7 +331,7 @@ class ShellMagics(magic.Magics):
         code = ' '.join(args.code) + '\n' + cell
         try:
             assemble(d, args.address, code, defines=all_defines())
-        except CodeError, e:
+        except CodeError as e:
             raise UsageError(str(e))
 
     @magic.line_cell_magic
@@ -378,7 +377,7 @@ class ShellMagics(magic.Magics):
         d = self.shell.user_ns['d']
         try:
             return evalc(d, line + cell, defines=all_defines(), includes=all_includes(), address=address, verbose=True)
-        except CodeError, e:
+        except CodeError as e:
             raise UsageError(str(e))
 
     @magic.line_cell_magic
@@ -393,7 +392,7 @@ class ShellMagics(magic.Magics):
 
         try:
             return_value = evalc(d, line + cell, defines=all_defines(), includes=all_includes(), address=address, verbose=True)
-        except CodeError, e:
+        except CodeError as e:
             raise UsageError(str(e))
 
         if return_value is not None:
@@ -423,7 +422,7 @@ class ShellMagics(magic.Magics):
 
         try:
             r0, r1 = evalasm(d, line, r0, defines=all_defines(), address=address, thumb=thumb)
-        except CodeError, e:
+        except CodeError as e:
             raise UsageError(str(e))
 
         self.shell.user_ns['r0'] = r0
@@ -496,7 +495,7 @@ class ShellMagics(magic.Magics):
                 reset = args.reset,
                 verbose = not args.quiet,
                 target_already_mapped = args.sram)
-        except CodeError, e:
+        except CodeError as e:
             raise UsageError(str(e))
 
         if args.console:
@@ -717,7 +716,7 @@ class ShellMagics(magic.Magics):
                 raise UsageError("Need a hardware serial port; see 'bitbang?' for more info")
 
             if args.reset:
-                print '* Trying to reset... (cycle power if target does not respond)'
+                print('* Trying to reset... (cycle power if target does not respond)')
                 reset_arm(d_remote)
 
             if not args.attach:

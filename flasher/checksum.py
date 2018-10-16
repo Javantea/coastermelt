@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 # Read or "fix" signature and checksum in MT1939 firmware image.
 # - Micah Elizabeth Scott 2014. This file is released into the public domain.
@@ -51,22 +51,22 @@ class Firmware:
         self.checksum_set(self.checksum_calculate())
 
     def info(self):
-        print '- Key at 10ff0'
-        print (' ' + 4*' %08x') % self.peek('<IIII', 0x10ff0);
+        print('- Key at 10ff0')
+        print((' ' + 4*' %08x') % self.peek('<IIII', 0x10ff0))
 
-        print '- Signature table at 10400'
+        print('- Signature table at 10400')
         for i in range(16):
             flag, mem_begin, mem_end, sig0, sig1, sig2, sig3 = self.sigtable_entry(i)
             if flag == 0xFFFFFFFF:
                 if i == 0:
-                    print '  (empty)'
+                    print('  (empty)')
                 break
-            print '  %08x:%08x  %08x-%08x-%08x-%08x  (%.1f kiB)' % (
-                mem_begin, mem_end, sig0, sig1, sig2, sig3, (mem_end - mem_begin + 1) / 1024.0)
+            print('  %08x:%08x  %08x-%08x-%08x-%08x  (%.1f kiB)' % (
+                mem_begin, mem_end, sig0, sig1, sig2, sig3, (mem_end - mem_begin + 1) / 1024.0))
 
-        print '- 16-bit checksum at 1ffffe'
-        print '  stored = %04x' % self.checksum_stored()
-        print '  actual = %04x' % self.checksum_calculate()
+        print('- 16-bit checksum at 1ffffe')
+        print('  stored = %04x' % self.checksum_stored())
+        print('  actual = %04x' % self.checksum_calculate())
 
 
 if __name__ == '__main__':
@@ -75,7 +75,7 @@ if __name__ == '__main__':
         f.info()
         f.fix()
         f.save(sys.argv[2])
-        print (
+        print(
             '\n'
             '--- Fixed it ---\n'
             '\n'
@@ -89,4 +89,4 @@ if __name__ == '__main__':
         Firmware(sys.argv[1]).info()
 
     else:
-        print 'usage: %s [--fix] <firmware.bin>' % sys.argv[0]
+        print('usage: %s [--fix] <firmware.bin>' % sys.argv[0])

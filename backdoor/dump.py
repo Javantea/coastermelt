@@ -92,7 +92,7 @@ def scsi_read_buffer(d, mode, address, size):
     with mode 6 mapped to ARM memory (low 16MB only) and mode 2 mapped
     to something we'll call DMA memory.
     """
-    return d.scsi_in(''.join(map(chr, [
+    return d.scsi_in(b''.join(map(chr, [
         0x3c, mode, 0,
         (address >> 16) & 0xff,
         (address >> 8) & 0xff,
@@ -117,7 +117,7 @@ def read_word_aligned_block(d, address, size,
         enabled=verbose, reporting_interval=reporting_interval)
 
     while i < size:
-        wordcount = min(size - i, 64*1024) / 4
+        wordcount = min(size - i, 64*1024) // 4
         dram_address = (address - 0x1c08000) & 0xffffffff
 
         if addr_space == 'dma' and hasattr(d, 'scsi_in'):
@@ -136,7 +136,7 @@ def read_word_aligned_block(d, address, size,
             # via the ARM to DRAM and DMA's it out to SCSI. Very fast, handles
             # addreses (including RAM mappings) below 2MB.
 
-            wordcount = min(wordcount, 64 * 1024 / 4)
+            wordcount = min(wordcount, 64 * 1024 // 4)
             part = scsi_read_buffer(d, 6, address + i, wordcount * 4)
 
         elif addr_space == 'arm':
@@ -154,7 +154,7 @@ def read_word_aligned_block(d, address, size,
         progress.update(i, size)
 
     progress.complete(i, size)
-    return ''.join(parts)
+    return b''.join(parts)
 
 
 def read_block(d, address, size, max_round_trips = None, fast = False, addr_space = 'arm'):
@@ -222,10 +222,10 @@ def hexdump(src, length = 16, address = 0, log_file = None):
     # Based on https://gist.github.com/sbz/1080258
     FILTER = ''.join([(len(repr(chr(x))) == 3) and chr(x) or '.' for x in range(256)])
     lines = []
-    for c in xrange(0, len(src), length):
-        chars = src[c:c+length]
-        hex = ' '.join(["%02x" % ord(x) for x in chars])
-        printable = ''.join(["%s" % ((ord(x) <= 127 and FILTER[ord(x)]) or '.') for x in chars])
+    for c in range(0, len(src), length):
+        cbytes = src[c:c+length]
+        hex = ' '.join(["%02x" % x for x in cbytes])
+        printable = ''.join(["%s" % ((x <= 127 and FILTER[x]) or '.') for x in cbytes])
         lines.append("%08x  %-*s  %s\n" % (address + c, length*3, hex, printable))
     return ''.join(lines)
 
@@ -240,7 +240,7 @@ def hexdump_words(src, words_per_line = 8, address = 0, log_file = None):
     assert (len(src) & 3) == 0
     words = words_from_string(src)
     lines = []
-    for c in xrange(0, len(words), words_per_line):
+    for c in range(0, len(words), words_per_line):
         w = words[c:c+words_per_line]
         hex = ' '.join(["%08x" % i for i in w])
         lines.append("%08x  %-*s\n" % (address + c*4, words_per_line*9, hex))
@@ -261,7 +261,7 @@ def dump_words(d, address, wordcount, log_file = 'result.log', fast = False, add
 if __name__ == "__main__":
     import remote
     if len(sys.argv) != 3:
-        print "usage: %s address size" % sys.argv[0]
+        print("usage: %s address size" % sys.argv[0])
         sys.exit(1)
     dump(remote.Device(),
         int(sys.argv[1].replace('_',''), 16), 

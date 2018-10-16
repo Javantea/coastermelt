@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
                         __                             __ __   
 .----.-----.---.-.-----|  |_.-----.----.--------.-----|  |  |_ 
@@ -64,22 +64,24 @@ from shell_magics import ShellMagics
 from remote import Device
 import shell_namespace
 import sys
+
 messages = ''
+user_ns = dict(shell_namespace.__dict__)
 
 # Make a global device, but only give it to the user namespace.
 # Make it default by assigning it to 'd', our current device.
 try:
-    shell_namespace.d = shell_namespace.d_remote = Device()
-except IOError, e:
+    user_ns['d'] = user_ns['d_remote'] = Device()
+except IOError as e:
     messages += "\n-------- There is NO DEVICE available! --------\n"
     messages += "\n%s\n\n" % e
     messages += "--> Try again to attach via USB:   %reset\n"
     messages += "--> Reattach over bitbang serial:  %bitbang -a /dev/tty.usb<tab>\n"
-    shell_namespace.d = shell_namespace.d_remote = None
+    user_ns['d'] = user_ns['d_remote'] = None
 
 # Make a shell that feels like a debugger
-ipy = InteractiveShellEmbed(user_ns = shell_namespace.__dict__)
-shell_namespace.ipy = ipy
+ipy = InteractiveShellEmbed(user_ns=user_ns)
+user_ns['ipy'] = ipy
 ipy.register_magics(ShellMagics)
 ipy.register_magic_function(lambda _: ipy.write(__doc__), magic_name='h')
 ipy.alias_manager.define_alias('git', 'git')

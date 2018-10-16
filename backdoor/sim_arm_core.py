@@ -3,7 +3,7 @@
 
 __all__ = [ 'SimARM', 'SimARMMemory' ]
 
-import cStringIO, struct, json, sys
+import struct, json, sys, io
 from code import *
 from dump import *
 from console import *
@@ -112,8 +112,8 @@ class SimARMMemory(object):
         self.hooks = {}
 
         # Local RAM and cached flash, reads and writes don't go to hardware
-        self.local_addresses = cStringIO.StringIO()
-        self.local_data = cStringIO.StringIO()
+        self.local_addresses = io.BytesIO()
+        self.local_data = io.BytesIO()
 
         # Detect fills
         self.rle = RunEncoder()
@@ -175,10 +175,10 @@ class SimARMMemory(object):
     def load_state(self, filebase):
         """Load state from save_state()"""
         with open(filebase + '.addr', 'rb') as f:
-           self.local_addresses = cStringIO.StringIO()
+           self.local_addresses = io.BytesIO()
            self.local_addresses.write(f.read())
         with open(filebase + '.data', 'rb') as f:
-            self.local_data = cStringIO.StringIO()
+            self.local_data = io.BytesIO()
             self.local_data.write(f.read())
 
     def local_ram(self, begin, end):
@@ -410,7 +410,7 @@ class SimARMMemory(object):
         """Install a C++ library to handle high-level emulation operations
         """
         self.hle_symbols = compile_library(self.device, code_address, self.hle_handlers)
-        print "* Installed High Level Emulation handlers at %08x" % code_address
+        print("* Installed High Level Emulation handlers at %08x" % code_address)
 
     def hle_invoke(self, instruction, r0):
         """Invoke the high-level emulation operation for an instruction

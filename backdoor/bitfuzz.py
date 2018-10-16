@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import time, sys
 
@@ -55,9 +55,9 @@ def bitfuzz_heading(address, wordcount):
 if __name__ == "__main__":
     import remote
     if len(sys.argv) != 3:
-        print "usage: %s address wordcount" % sys.argv[0]
+        print("usage: %s address wordcount" % sys.argv[0])
         sys.exit(1)
     for line in bitfuzz_rounds(remote.Device(),
             int(sys.argv[1].replace('_',''), 16), 
             int(sys.argv[2].replace('_',''), 16)):
-        print line
+        print(line)

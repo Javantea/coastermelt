@@ -68,13 +68,13 @@ def cpu8051_backdoor(d,
     bd = BackdoorDevice(d, lib)
 
     if verbose:
-        print "* 8051 backdoor is 0x%x bytes, loaded at 0x%x" % (len(bd51string), address)
-        print "* ARM library is 0x%x bytes, loaded at 0x%x" % (len(libstring), code_address)
+        print("* 8051 backdoor is 0x%x bytes, loaded at 0x%x" % (len(bd51string), address))
+        print("* ARM library is 0x%x bytes, loaded at 0x%x" % (len(libstring), code_address))
 
     if start_cpu:
         bd.start()
         if verbose:
-            print "* 8051 backdoor running"
+            print("* 8051 backdoor running")
 
     # Device object for interacting with the 8051 via Python
     return bd

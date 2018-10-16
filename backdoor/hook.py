@@ -110,7 +110,7 @@ def overlay_hook(d, hook_address, handler,
 
     patched_ovl_data = (
         ovl_data[:hook_address - ovl_address] +
-        '\xbe' * hook_instruction_size +
+        b'\xbe' * hook_instruction_size +
         ovl_data[return_address - ovl_address:]
     )
 
@@ -306,7 +306,7 @@ def overlay_hook(d, hook_address, handler,
         # writing data to the existing mapping.
         poke_words(d, ovl_address, words_from_string(patched_ovl_data))
     else:
-        overlay_set(d, ovl_address, ovl_size/4)
+        overlay_set(d, ovl_address, ovl_size//4)
 
     # Look at our handiwork in the disassembler
 
@@ -317,12 +317,12 @@ def overlay_hook(d, hook_address, handler,
     )
 
     if verbose:
-        print "* Handler compiled to 0x%x bytes, loaded at 0x%x" % (handler_len, handler_address)
-        print "* ISR assembled to 0x%x bytes, loaded at 0x%x" % (isr_len, isr_address)
-        print "* Hook at 0x%x, returning to 0x%x" % (hook_address, return_address)
-        print "* RAM overlay, 0x%x bytes, loaded at 0x%x" % (ovl_size, ovl_address)
+        print("* Handler compiled to 0x%x bytes, loaded at 0x%x" % (handler_len, handler_address))
+        print("* ISR assembled to 0x%x bytes, loaded at 0x%x" % (isr_len, isr_address))
+        print("* Hook at 0x%x, returning to 0x%x" % (hook_address, return_address))
+        print("* RAM overlay, 0x%x bytes, loaded at 0x%x" % (ovl_size, ovl_address))
     if show_asm_diff:
-        print asm_diff
+        print(asm_diff)
 
     # Most common failure mode I'm seeing now is that the overlay gets stolen or
     # the truncation bug just breaks things and the patch doesn't install.

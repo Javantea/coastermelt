@@ -108,7 +108,7 @@ static int device_init(Device *self, PyObject *args, PyObject *kw)
 static void device_dealloc(Device *self)
 {
     Py_DECREF(device_close(self));
-    self->ob_type->tp_free((PyObject *)self);
+    PyObject_Del((PyObject *)self);
 }
 
 
@@ -131,7 +131,7 @@ static PyObject* device_get_signature(Device *self)
         return 0;
     }
 
-    return PyString_FromStringAndSize((const char *) &bdsig.bytes[0], sizeof bdsig.bytes);
+    return PyBytes_FromStringAndSize((const char *) &bdsig.bytes[0], sizeof bdsig.bytes);
 }
 
 
@@ -196,12 +196,12 @@ static PyObject* device_scsi_in(Device *self, PyObject *args)
         PyErr_SetString(PyExc_IOError, "SCSI command failed");
         fprintf(stderr, "[SCSI] Failed IN command, %d bytes\n", size);
         hexdump((uint8_t*)cdb.buf, (unsigned)cdb.len);
-        delete buffer;
+        delete[] buffer;
         return 0;
     }
 
-    PyObject *result = PyString_FromStringAndSize((const char *) buffer, size);
-    delete buffer;
+    PyObject *result = PyBytes_FromStringAndSize((const char *) buffer, size);
+    delete[] buffer;
     return result;
 }
 
@@ -433,7 +433,7 @@ static PyObject* device_read_block(Device *self, PyObject *args)
         return 0;
     }
     
-    return PyString_FromStringAndSize((const char *) result, 4 * wordcount);
+    return PyBytes_FromStringAndSize((const char *) result, 4 * wordcount);
 }
 
 
@@ -527,24 +527,30 @@ static PyMethodDef device_methods[] =
 
 static PyTypeObject device_type =
 {
-    PyObject_HEAD_INIT(0)
+    .ob_base = { PyObject_HEAD_INIT(&PyType_Type) },
     .tp_name = "remote.Device",
     .tp_basicsize = sizeof(Device),
     .tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,
     .tp_methods = device_methods,
     .tp_init = (initproc) device_init,
     .tp_dealloc = (destructor) device_dealloc,
+    .tp_new = PyType_GenericNew,
+    .tp_alloc = PyType_GenericAlloc,
 };
 
-PyMODINIT_FUNC initremote(void)
+static PyModuleDef module_def =
 {
-    PyObject *m = Py_InitModule3("remote", 0, 0);
+    .m_base = PyModuleDef_HEAD_INIT,
+    .m_name = "remote",
+};
+
+PyMODINIT_FUNC PyInit_remote(void)
+{
+    PyObject *m = PyModule_Create(&module_def);
 
     Py_INCREF(&device_type);
-    device_type.tp_new = PyType_GenericNew;
-    if (PyType_Ready(&device_type) < 0)
-        return;
-
     PyModule_AddObject(m, "Device", (PyObject *) &device_type);
+
+    return m;
 }
 

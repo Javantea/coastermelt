@@ -58,12 +58,12 @@ class BitbangDevice:
     def _write(self, s, delay = 2):
         # Write framed bytes to the bitbang serial port
         # Low-level write. Since it's a janky bit-bang serial port, go really slowly.
-        self.port.write(''.join(['\xff' * delay + '\x00' + c for c in s]))
+        self.port.write(b''.join([bytes([255] * delay + [0, c]) for c in s]))
 
     def _delay(self, n):
         # Insert a timed delay into the output buffer, to account for time taken
         # by the backdoor code between packets.
-        self.port.write('\xff' * n)
+        self.port.write(b'\xff' * n)
 
     def _check(self, check, data, address):
         if check != data ^ address:
@@ -83,7 +83,7 @@ class BitbangDevice:
                         # Consolidate this in with other I/O errors
                         raise IOError("The device was quiet when we expected a reply :(")
 
-                except IOError, e:
+                except IOError as e:
                     if retries:
                         retries -= 1
                         continue
@@ -109,8 +109,8 @@ class BitbangDevice:
         self.synchronized = False
         expected_signature = '~MeS`14 [bitbang]\r\n'    
         self.port.flushInput()
-        self._write('\n' * 32)
-        self._delay(100)
+        self._write(b'\n' * 32)
+        self._delay(1000)
 
         if self.port.read(len(expected_signature)) == expected_signature:
             # Make sure we're synchronized, cuz the dumb protocol is dumb.
@@ -191,8 +191,8 @@ class BitbangDevice:
     @_auto_retry
     @_maintain_sync
     def exit(self):
-        self._write(chr(0x87))
-        if self.port.read() != chr(0x55):
+        self._write(b'\x87')
+        if self.port.read() != b'\x55':
             raise IOError("Response byte incorrect")
         self.port.close()
 

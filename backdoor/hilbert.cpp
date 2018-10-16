@@ -76,13 +76,13 @@ static PyObject* py_test(PyObject *self)
 
             if (a > 0xFFFFFF) {
                 PyErr_SetString(PyExc_ValueError, "Hilbert result out of range");
-                delete buffer;
+                delete[] buffer;
                 return 0;
             }
 
             if (buffer[a]) {            
                 PyErr_SetString(PyExc_ValueError, "Location used twice");
-                delete buffer;
+                delete[] buffer;
                 return 0;
             }
 
@@ -90,7 +90,7 @@ static PyObject* py_test(PyObject *self)
         }
     }
 
-    delete buffer;
+    delete[] buffer;
     Py_RETURN_NONE;
 }
 
@@ -104,7 +104,15 @@ static PyMethodDef module_methods[] = {
     {0}
 };
 
-PyMODINIT_FUNC inithilbert(void)
+
+static PyModuleDef module_def =
 {
-    Py_InitModule3("hilbert", module_methods, 0);
+    .m_base = PyModuleDef_HEAD_INIT,
+    .m_name = "hilbert",
+    .m_methods = module_methods,
+};
+
+PyMODINIT_FUNC PyInit_hilbert(void)
+{
+    return PyModule_Create(&module_def);
 }

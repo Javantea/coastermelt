@@ -121,7 +121,7 @@ def simulate_arm(device):
         arm.memory.skip_stores.clear()
 
         # First ISR, 0x18
-        print "SIM: isr_18"
+        print("SIM: isr_18")
         arm.irq_saved = arm.state
         arm.regs[15] = 0x158
         arm.regs[13] = 0x20009d0
@@ -130,7 +130,7 @@ def simulate_arm(device):
 
     def fn(arm):
         # Next ISR
-        print "SIM: isr_1c"
+        print("SIM: isr_1c")
         arm.regs[15] = 0x22114
         arm.regs[13] = 0x20009d0
         arm.thumb = False
@@ -138,7 +138,7 @@ def simulate_arm(device):
 
     def fn(arm):
         # Return to the main loop
-        print "SIM: main loop"
+        print("SIM: main loop")
         arm.state = arm.irq_saved
     m.hook(0x2203e, fn)
     m.hook(0x22138, fn)
@@ -154,7 +154,7 @@ def simulate_arm(device):
     rates = ('512*1024 Hz', '16*1024 Hz', '1024 Hz')
     def fn(arm):
         sim_clock[0] = (sim_clock[0] + 1) & 0xffff
-        print "SIM: Fake clock %04x (requested rate %s)" % (sim_clock[0], rates[arm.regs[0]])
+        print("SIM: Fake clock %04x (requested rate %s)" % (sim_clock[0], rates[arm.regs[0]]))
         arm.regs[0] = sim_clock[0]
     m.patch(0x8519c, 'bx lr')
     m.hook(0x8519c, fn)
@@ -172,10 +172,10 @@ def simulate_arm(device):
 def autostep_until(breakpoint, message):
     """Return a hook function that continuously steps until the breakpoint"""
     def fn(arm):
-        print "SIM: autostep until %08x, %s" % (breakpoint, message)
+        print("SIM: autostep until %08x, %s" % (breakpoint, message))
         while arm.regs[15] != breakpoint:
             arm.step(repeat=1000000, breakpoint=breakpoint)
-            print "SIM: still autostepping..."
-        print "SIM: autostep breakpoint reached"
+            print("SIM: still autostepping...")
+        print("SIM: autostep breakpoint reached")
     return fn
 
