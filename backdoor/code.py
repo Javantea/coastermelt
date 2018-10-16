@@ -372,12 +372,12 @@ unsigned __attribute__ ((externally_visible))
 return ( %s );
 }
             ''' % (name, code)
-            for name, code in code_dict.iteritems()]))
+            for name, code in code_dict.items()]))
 
         compile_objfile(temp, thumb)
 
         symbols = {}
-        sym_text = subprocess.check_output([ OBJDUMP, '-t', '-w', temp.o ])
+        sym_text = subprocess.check_output([ OBJDUMP, '-t', '-w', temp.o ]).decode('utf8')
         for line in sym_text.split('\n'):
             tokens = line.split()
             if len(tokens) >= 6 and tokens[2] == 'F' and tokens[3] == '.text':

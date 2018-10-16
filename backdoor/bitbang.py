@@ -107,10 +107,10 @@ class BitbangDevice:
     def sync(self):
         # Gross delay-based synchronization, but it keeps the part on the slow CPU simple.
         self.synchronized = False
-        expected_signature = '~MeS`14 [bitbang]\r\n'    
+        expected_signature = b'~MeS`14 [bitbang]\r\n'
         self.port.flushInput()
         self._write(b'\n' * 32)
-        self._delay(1000)
+        self._delay(100)
 
         if self.port.read(len(expected_signature)) == expected_signature:
             # Make sure we're synchronized, cuz the dumb protocol is dumb.

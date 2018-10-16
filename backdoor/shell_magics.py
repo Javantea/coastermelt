@@ -837,3 +837,8 @@ class Tee(object):
         for f in self.files:
             f.write(s)
 
+    def flush(self):
+        for f in self.files:
+            f.flush()
+
+

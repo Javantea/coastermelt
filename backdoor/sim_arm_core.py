@@ -183,7 +183,7 @@ class SimARMMemory(object):
 
     def local_ram(self, begin, end):
         self.local_addresses.seek(begin)
-        self.local_addresses.write('\xff' * (end - begin + 1))
+        self.local_addresses.write(b'\xff' * (end - begin + 1))
 
     def note(self, address):
         return self.patch_notes.get(address & ~1, '')
@@ -281,7 +281,7 @@ class SimARMMemory(object):
         """How many bytes of local data are available at an address?"""
         self.local_addresses.seek(address)
         flags = self.local_addresses.read(limit)
-        return len(flags[:flags.find('\x00')])
+        return len(flags[:flags.find(b'\x00')])
 
     def flash_prefetch_hint(self, address):
         """We're accessing an address, if it's flash maybe prefetch around it.
@@ -299,7 +299,7 @@ class SimARMMemory(object):
     def load(self, address):
         self.flash_prefetch_hint(address)
         self.local_addresses.seek(address)
-        if self.local_addresses.read(4) == '\xff\xff\xff\xff':
+        if self.local_addresses.read(4) == b'\xff\xff\xff\xff':
             self.local_data.seek(address)
             return struct.unpack('<I', self.local_data.read(4))[0]
 
@@ -313,7 +313,7 @@ class SimARMMemory(object):
     def load_half(self, address):
         self.flash_prefetch_hint(address)
         self.local_addresses.seek(address)
-        if self.local_addresses.read(2) == '\xff\xff':
+        if self.local_addresses.read(2) == b'\xff\xff':
             self.local_data.seek(address)
             return struct.unpack('<H', self.local_data.read(2))[0]
 
@@ -327,7 +327,7 @@ class SimARMMemory(object):
     def load_byte(self, address):
         self.flash_prefetch_hint(address)
         self.local_addresses.seek(address)
-        if self.local_addresses.read(1) == '\xff':
+        if self.local_addresses.read(1) == b'\xff':
             self.local_data.seek(address)
             return ord(self.local_data.read(1))
 
@@ -339,7 +339,7 @@ class SimARMMemory(object):
 
     def store(self, address, data):
         self.local_addresses.seek(address)
-        if self.local_addresses.read(4) == '\xff\xff\xff\xff':
+        if self.local_addresses.read(4) == b'\xff\xff\xff\xff':
             self.local_data.seek(address)
             self.local_data.write(struct.pack('<I', data))
             return
@@ -353,7 +353,7 @@ class SimARMMemory(object):
 
     def store_half(self, address, data):
         self.local_addresses.seek(address)
-        if self.local_addresses.read(2) == '\xff\xff':
+        if self.local_addresses.read(2) == b'\xff\xff':
             self.local_data.seek(address)
             self.local_data.write(struct.pack('<H', data))
             return
@@ -367,9 +367,9 @@ class SimARMMemory(object):
 
     def store_byte(self, address, data):
         self.local_addresses.seek(address)
-        if self.local_addresses.read(1) == '\xff':
+        if self.local_addresses.read(1) == b'\xff':
             self.local_data.seek(address)
-            self.local_data.write(chr(data))
+            self.local_data.write(bytes([data]))
             return
 
         if address in self.skip_stores:
@@ -419,7 +419,7 @@ class SimARMMemory(object):
         cb = ConsoleBuffer(self.device)
         cb.discard()
         r0, _ = self.device.blx(self.hle_symbols[instruction.hle], r0)
-        logdata = cb.read(max_round_trips = None)
+        logdata = cb.read(max_round_trips = None).decode('utf8')
 
         # Prefix log lines, normalize trailing newline
         logdata = '\n'.join([ 'HLE: ' + l for l in logdata.rstrip().split('\n') ]) + '\n'
