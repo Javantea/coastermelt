@@ -21,7 +21,7 @@ def categorize_block(d, address, size, addr_space='arm'):
     t1 = time.time()
     try:
         head = read_block(d, address, size, max_round_trips=1, addr_space=addr_space)
-    except IOError, e:
+    except IOError as e:
         print e
         head = None
     t2 = time.time()
