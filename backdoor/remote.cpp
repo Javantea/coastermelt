@@ -530,12 +530,12 @@ static PyTypeObject device_type =
     .ob_base = { PyObject_HEAD_INIT(&PyType_Type) },
     .tp_name = "remote.Device",
     .tp_basicsize = sizeof(Device),
+    .tp_dealloc = (destructor) device_dealloc,
     .tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,
     .tp_methods = device_methods,
     .tp_init = (initproc) device_init,
-    .tp_dealloc = (destructor) device_dealloc,
-    .tp_new = PyType_GenericNew,
     .tp_alloc = PyType_GenericAlloc,
+    .tp_new = PyType_GenericNew,
 };
 
 static PyModuleDef module_def =

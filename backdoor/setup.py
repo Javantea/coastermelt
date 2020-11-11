@@ -1,8 +1,12 @@
 #!/usr/bin/env python3
 
 from distutils.core import setup, Extension
+import sys
 
-frameworks = '-framework CoreFoundation -framework IOKit'.split()
+if sys.platform == 'darwin':
+    frameworks = '-framework CoreFoundation -framework IOKit'.split()
+else:
+    frameworks = ''
 
 setup(ext_modules=[
 

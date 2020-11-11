@@ -1,5 +1,5 @@
 FIRMWARE_NAME := SE-506CB_TS01
-FIRMWARE_URL  := "http://www.tsstodd.com/TotalLib/popup/Download.asp?path=fwdownload&lang=eng&fname=SE-506CB_TS01.exe"
+#FIRMWARE_URL  := "http://www.tsstodd.com/TotalLib/popup/Download.asp?path=fwdownload&lang=eng&fname=SE-506CB_TS01.exe"
 
 PATCH_ADDR := 0xC9600
 PATCH_BIN := bin/patch.bin
@@ -50,9 +50,9 @@ $(FLASHER_TOOL):
 	make -C $(FLASHER_DIR)
 
 # Download the original firmware from TSST's web site (slow, only happens once)
-bin/$(FIRMWARE_NAME).exe: bin/firmware.shasum
-	echo --- Downloading original firmware image
-	$(CURL_TOOL) $(FIRMWARE_URL) > $@
+#bin/$(FIRMWARE_NAME).exe: bin/firmware.shasum
+#	echo --- Downloading original firmware image
+#	$(CURL_TOOL) $(FIRMWARE_URL) > $@
 
 # The EXE is a self-extracting ZIP actually. Grab the .BIN file and check its shasum
 $(FIRMWARE_BIN): bin/$(FIRMWARE_NAME).exe
@@ -67,7 +67,7 @@ $(BACKDOOR_BIN): $(PATCH_BIN) $(FIRMWARE_BIN)
 
 # Use GCC_ARM to assemble the patch into a plain Thumb binary
 $(PATCH_BIN): $(PATCH_SRC)
-	$(GCC_ARM) -nostdlib -nostdinc -o $@ $<
+	$(GCC_ARM) -nostdlib -nostdinc -march=armv7 -mtune=arm7tdmi -o $@ $<
 	$(OBJCOPY_ARM) $@ -O binary
 
 

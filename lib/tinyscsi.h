@@ -23,11 +23,27 @@
  */
 
 #pragma once
+
+#ifdef __APPLE__
 #include <CoreFoundation/CoreFoundation.h>
 #include <IOKit/IOKitLib.h>
 #include <IOKit/usb/IOUSBLib.h>
 #include <IOKit/scsi/SCSITaskLib.h>
 #include <IOKit/scsi/SCSITask.h>
+#elif defined(WIN32) || defined(__WIN32) || defined(__WIN32__) || defined(__NT__)
+#error No support for Windows just yet.
+#elif __linux__
+// TODO: Linux
+#warning No support for Linux just yet.
+
+
+#elif __unix__
+// TODO: BSD
+#warning No support for Unix just yet.
+#else
+#error Define the right variable for your library.
+#endif
+
 #include <stdio.h>
 
 
@@ -56,6 +72,7 @@ public:
         return command(cdb, cdbLen, OUT, data, dataLen);
     }
 
+#ifdef __APPLE__
     struct {
         uint64_t transferCount;
         SCSITaskStatus taskStatus;
@@ -66,6 +83,8 @@ private:
     SCSITaskDeviceInterface** mInterface;
     SCSITaskInterface** mTask;
     IOUSBDeviceInterface187** mUSB;
+#endif
+
 };
 
 
@@ -75,6 +94,7 @@ private:
 
 inline bool TinySCSI::open(uint16_t idVendor, uint16_t idProduct)
 {
+#ifdef __APPLE__
     CFMutableDictionaryRef matching = CFDictionaryCreateMutable(
         kCFAllocatorDefault, 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
 
@@ -152,12 +172,13 @@ inline bool TinySCSI::open(uint16_t idVendor, uint16_t idProduct)
 
     // We only use one active task at a time
     mTask = (*mInterface)->CreateSCSITask(mInterface);
-
+#endif // __APPLE__
     return true;
 }
 
 inline bool TinySCSI::reEnumerate()
 {
+#ifdef __APPLE__
     OSStatus kr;
 
     kr = (*mUSB)->USBDeviceOpen(mUSB);
@@ -177,12 +198,14 @@ inline bool TinySCSI::reEnumerate()
         fprintf(stderr, "[SCSI] Failed to re-enumerate USB device (%08x)\n", (int)kr);
         return false;
     }
+#endif // __APPLE__
 
     return true;
 }
 
 inline bool TinySCSI::command(uint8_t* cdb, unsigned cdbLen, DataDirection dir, uint8_t* data, unsigned dataLen)
 {
+#ifdef __APPLE__
     memset(&result, 0, sizeof result);
 
     uint32_t transferDirection;
@@ -228,5 +251,6 @@ inline bool TinySCSI::command(uint8_t* cdb, unsigned cdbLen, DataDirection dir, 
         return false;
     }
 
+#endif // __APPLE__
     return true;
 }
